@@ -17,6 +17,22 @@
       <p class="generator-copy">Add a fresh, delightfully unusual word to your day.<br>You have 10 minutes to learn about this random word, then speak about it for 2 minutes and record yourself.</p>
       <p class="result" data-result aria-live="polite">Ready for a word?</p>
       <button class="generate-button" type="button" data-generate>Give me a word</button>
+      <section class="recording-panel" aria-labelledby="recording-title">
+        <h2 id="recording-title">Practice recording</h2>
+        <p>Your browser will ask for camera and microphone permission. Recordings stay on this device unless you choose to download one.</p>
+        <video class="camera-preview" data-camera-preview autoplay muted playsinline hidden></video>
+        <div class="recording-actions">
+          <button class="record-button" type="button" data-record>Record yourself</button>
+          <button class="record-button record-button-stop" type="button" data-stop-recording hidden>Stop recording</button>
+        </div>
+        <p class="recording-timer" data-recording-timer hidden aria-live="off">Recording time: 00:00</p>
+        <p class="recording-status" data-recording-status role="status" aria-live="polite"></p>
+        <video class="camera-preview recorded-video" data-recorded-video controls playsinline hidden></video>
+        <div class="recording-options" data-recording-options hidden>
+          <a class="recording-download" data-recording-download>Download recording</a>
+          <button class="record-button record-button-delete" type="button" data-delete-recording>Delete recording</button>
+        </div>
+      </section>
     </section>
   </main>
 </body>

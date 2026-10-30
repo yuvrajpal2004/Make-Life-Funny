@@ -495,3 +495,167 @@ document.querySelectorAll("[data-generator]").forEach((generator) => {
     result.textContent = items[nextIndex];
   });
 });
+
+const recordButton = document.querySelector("[data-record]");
+const stopRecordingButton = document.querySelector("[data-stop-recording]");
+const cameraPreview = document.querySelector("[data-camera-preview]");
+const recordedVideo = document.querySelector("[data-recorded-video]");
+const recordingStatus = document.querySelector("[data-recording-status]");
+const recordingDownload = document.querySelector("[data-recording-download]");
+const recordingTimer = document.querySelector("[data-recording-timer]");
+const recordingOptions = document.querySelector("[data-recording-options]");
+const deleteRecordingButton = document.querySelector("[data-delete-recording]");
+
+if (
+  recordButton &&
+  stopRecordingButton &&
+  cameraPreview instanceof HTMLVideoElement &&
+  recordedVideo instanceof HTMLVideoElement &&
+  recordingStatus &&
+  recordingDownload instanceof HTMLAnchorElement &&
+  recordingTimer &&
+  recordingOptions &&
+  deleteRecordingButton
+) {
+  let cameraStream;
+  let mediaRecorder;
+  let recordingChunks = [];
+  let recordingUrl;
+  let recordingStartedAt;
+  let recordingTimerInterval;
+
+  const updateRecordingTimer = () => {
+    const elapsedSeconds = Math.floor((performance.now() - recordingStartedAt) / 1000);
+    const hours = Math.floor(elapsedSeconds / 3600);
+    const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+    const seconds = elapsedSeconds % 60;
+    const time = hours > 0
+      ? [hours, minutes, seconds].map((part) => String(part).padStart(2, "0")).join(":")
+      : [minutes, seconds].map((part) => String(part).padStart(2, "0")).join(":");
+    recordingTimer.textContent = `Recording time: ${time}`;
+  };
+
+  const clearRecording = () => {
+    recordedVideo.pause();
+    recordedVideo.removeAttribute("src");
+    recordedVideo.load();
+    recordedVideo.hidden = true;
+    recordingDownload.removeAttribute("href");
+    recordingOptions.hidden = true;
+    if (recordingUrl) {
+      URL.revokeObjectURL(recordingUrl);
+      recordingUrl = undefined;
+    }
+  };
+
+  const stopCamera = () => {
+    cameraStream?.getTracks().forEach((track) => track.stop());
+    cameraStream = undefined;
+    cameraPreview.srcObject = null;
+    cameraPreview.hidden = true;
+  };
+
+  recordButton.addEventListener("click", async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      recordingStatus.textContent = "Camera access requires a supported browser and a secure connection (HTTPS or localhost).";
+      return;
+    }
+
+    if (!window.MediaRecorder) {
+      recordingStatus.textContent = "Recording is not supported by this browser.";
+      return;
+    }
+
+    recordButton.disabled = true;
+    recordingStatus.textContent = "Requesting camera access…";
+
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      cameraPreview.srcObject = cameraStream;
+      cameraPreview.hidden = false;
+      recordingChunks = [];
+
+      const mimeType = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/mp4"]
+        .find((type) => MediaRecorder.isTypeSupported(type));
+      const options = mimeType ? { mimeType } : undefined;
+      mediaRecorder = new MediaRecorder(cameraStream, options);
+      mediaRecorder.addEventListener("dataavailable", (event) => {
+        if (event.data.size > 0) {
+          recordingChunks.push(event.data);
+        }
+      });
+      mediaRecorder.addEventListener("stop", () => {
+        stopCamera();
+        window.clearInterval(recordingTimerInterval);
+        updateRecordingTimer();
+        stopRecordingButton.hidden = true;
+        stopRecordingButton.disabled = false;
+        recordButton.hidden = false;
+        recordButton.disabled = false;
+
+        const recording = new Blob(recordingChunks, {
+          type: mediaRecorder.mimeType || recordingChunks[0]?.type || "video/webm"
+        });
+        if (recording.size === 0) {
+          recordingStatus.textContent = "No video was captured. Please try recording again.";
+          return;
+        }
+
+        if (recordingUrl) {
+          URL.revokeObjectURL(recordingUrl);
+        }
+        recordingUrl = URL.createObjectURL(recording);
+        recordedVideo.src = recordingUrl;
+        recordedVideo.hidden = false;
+        recordingDownload.href = recordingUrl;
+        recordingDownload.download = `practice-recording.${recording.type.includes("mp4") ? "mp4" : "webm"}`;
+        recordingOptions.hidden = false;
+        recordingStatus.textContent = "Recording ready. You can play it here or download it.";
+      });
+
+      mediaRecorder.start();
+      clearRecording();
+      recordingStartedAt = performance.now();
+      updateRecordingTimer();
+      recordingTimer.hidden = false;
+      recordingTimerInterval = window.setInterval(updateRecordingTimer, 250);
+      recordButton.hidden = true;
+      stopRecordingButton.hidden = false;
+      stopRecordingButton.disabled = false;
+      recordingStatus.textContent = "Recording in progress. Select Stop recording when you are finished.";
+    } catch (error) {
+      stopCamera();
+      recordButton.disabled = false;
+      if (error instanceof DOMException && error.name === "NotAllowedError") {
+        recordingStatus.textContent = "Camera or microphone permission was denied. Allow access in your browser settings, then try again.";
+      } else if (error instanceof DOMException && error.name === "NotFoundError") {
+        recordingStatus.textContent = "No camera or microphone was found on this device.";
+      } else {
+        recordingStatus.textContent = "The camera could not be started. Check that it is connected and not being used by another app, then try again.";
+      }
+    }
+  });
+
+  stopRecordingButton.addEventListener("click", () => {
+    if (mediaRecorder?.state === "recording") {
+      stopRecordingButton.disabled = true;
+      recordingStatus.textContent = "Finishing your recording…";
+      mediaRecorder.stop();
+    }
+  });
+
+  deleteRecordingButton.addEventListener("click", () => {
+    clearRecording();
+    recordingTimer.hidden = true;
+    recordingTimer.textContent = "Recording time: 00:00";
+    recordingStatus.textContent = "Recording deleted.";
+  });
+
+  window.addEventListener("beforeunload", () => {
+    window.clearInterval(recordingTimerInterval);
+    stopCamera();
+    if (recordingUrl) {
+      URL.revokeObjectURL(recordingUrl);
+    }
+  });
+}

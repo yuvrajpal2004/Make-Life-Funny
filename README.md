@@ -7,6 +7,7 @@ Make Life Funny is a small, cheerful website for adding a little curiosity and c
 The project is designed to make it easy to try something new:
 
 - **Random word** picks a word or topic to learn about. The page suggests spending 10 minutes learning about it, then speaking about it for two minutes and recording yourself.
+- **Practice recording** on the Random word page requests camera and microphone access, shows an elapsed-time counter while recording, and lets you replay, download, or delete the video. The page does not upload recordings.
 - **Random things** suggests a small confidence-building challenge, such as starting a friendly conversation or trying a familiar public activity.
 - Both generators show a new suggestion when their button is clicked. They avoid immediately repeating the previous suggestion when there is more than one item.
 
@@ -19,6 +20,7 @@ Challenges are suggestions, not requirements. Choose a safe, familiar setting, k
 - **Vanilla JavaScript** stores the suggestions and selects one at random when a button is clicked.
 
 The project does not use a JavaScript framework, external library, package manager, database, or build system. Its files are served directly by a browser, so no compilation or dependency installation is required.
+Camera recording requires browser permission and a secure context, such as HTTPS or `localhost`. Browsers cannot open the operating system's standalone Camera app from a webpage.
 
 ## Project files
 

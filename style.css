@@ -244,6 +244,114 @@ h1 span {
   filter: brightness(1.08);
 }
 
+.recording-panel {
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid #e8e1f1;
+}
+
+.recording-panel h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.recording-panel > p:not(.recording-status) {
+  margin: 10px 0 20px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.camera-preview {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  margin: 20px auto;
+  border-radius: 16px;
+  background: #171522;
+  object-fit: cover;
+}
+
+.recording-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.recording-timer {
+  margin: 18px 0 0;
+  color: #d94b83;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.record-button {
+  min-height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: #d94b83;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.record-button:hover {
+  filter: brightness(1.08);
+}
+
+.record-button-delete {
+  background: #6f6a7b;
+}
+
+.record-button:focus-visible,
+.recording-download:focus-visible {
+  outline: 3px solid var(--purple);
+  outline-offset: 4px;
+}
+
+.record-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.recording-status {
+  min-height: 1.5em;
+  margin: 16px 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.recording-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.recording-download {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #f0eaff;
+  color: var(--purple);
+  font-weight: 800;
+  text-underline-offset: 3px;
+  text-decoration: none;
+}
+
+.recording-download:hover {
+  background: #e6dcff;
+}
+
+.recording-panel [hidden] {
+  display: none;
+}
+
 @media (max-width: 620px) {
   .home-page {
     justify-content: flex-start;
